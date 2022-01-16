@@ -25,7 +25,15 @@ BATCH_SIZE = 100  # Number of training examples to process before updating our m
 IMG_SHAPE = 150  # Our training data consists of images with width of 150 pixels and height of 150 pixels
 
 # generate batches of image data (and their labels) directly from our jpgs in their respective folders
-train_image_generator = ImageDataGenerator(rescale=1. / 255)  # Generator for our training data
+# train_image_generator = ImageDataGenerator(rescale=1. / 255)  # Generator for our training data
+train_image_generator = ImageDataGenerator(rescale=1. / 255,
+                                           rotation_range=40,
+                                           width_shift_range=0.2,
+                                           height_shift_range=0.2,
+                                           shear_range=0.2,
+                                           zoom_range=0.2,
+                                           horizontal_flip=True,
+                                           fill_mode='nearest')
 validation_image_generator = ImageDataGenerator(rescale=1. / 255)  # Generator for our validation data
 
 train_data_gen = train_image_generator.flow_from_directory(batch_size=BATCH_SIZE,  # read 100 images at a time
@@ -54,6 +62,7 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2, 2),
 
+    tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(512, activation='relu'),
     tf.keras.layers.Dense(2, activation='softmax')

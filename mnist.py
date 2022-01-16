@@ -1,7 +1,9 @@
 import tensorflow.compat.v1 as tf
 from tensorflow import keras
+import numpy as np
 
-mnist = keras.datasets.mnist
+mnist = keras.datasets.fashion_mnist
+# mnist = keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train = keras.utils.normalize(x_train, axis=1)
 x_test = keras.utils.normalize(x_test, axis=1)
@@ -38,7 +40,11 @@ def ConvNN():
 # model = MultilayerPerceptron()
 model = ConvNN()
 # model.fit(x_train, y_train, epochs=3)
-model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=3, batch_size=200, verbose=2)
+model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=8, batch_size=200, verbose=2)
 
 val_loss, val_acc = model.evaluate(x_test, y_test)
 print(val_loss, val_acc)
+
+predictions = model.predict(x_test)
+print(predictions[0])
+print(np.argmax(predictions[0]), y_test[0])

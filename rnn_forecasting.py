@@ -149,6 +149,29 @@ def rnn_stateful(x_train, x_valid, window_size):
     return mae
 
 
+def rnn_lstm(x_train, x_valid, window_size):
+    train_set = sequential_window_dataset(x_train, window_size)
+    valid_set = sequential_window_dataset(x_valid, window_size)
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.LSTM(100, return_sequences=True, stateful=True, batch_input_shape=[1, None, 1]),
+        tf.keras.layers.LSTM(100, return_sequences=True, stateful=True),
+        tf.keras.layers.Dense(1),
+        tf.keras.layers.Lambda(lambda x: x * 200.0)])
+    optimizer = tf.keras.optimizers.SGD(lr=5e-7, momentum=0.9)
+    model.compile(loss=tf.keras.losses.Huber(),
+                  optimizer=optimizer,
+                  metrics=["mae"])
+    reset_states = ResetStatesCallback()
+    early_stopping = tf.keras.callbacks.EarlyStopping(patience=50)
+    model.fit(train_set, epochs=500,
+              validation_data=valid_set,
+              callbacks=[early_stopping, reset_states])
+    rnn_forecast = model.predict(series[np.newaxis, :, np.newaxis])
+    rnn_forecast = rnn_forecast[0, split_time - 1:-1, 0]
+    mae = tf.keras.metrics.mean_absolute_error(x_valid, rnn_forecast).numpy()
+    return mae
+
+
 time = np.arange(4 * 365 + 1)
 slope = 0.05
 baseline = 10
@@ -176,3 +199,5 @@ mae_seq2seq = rnn_seq2seq(x_train, x_valid, window_size)
 print('mae_seq2seq:', mae_seq2seq)
 mae_stateful = rnn_stateful(x_train, x_valid, window_size)
 print('mae_stateful:', mae_stateful)
+mae_lstm = rnn_lstm(x_train, x_valid, window_size)
+print('mae_lstm:', mae_lstm)

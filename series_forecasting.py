@@ -50,6 +50,20 @@ x_train = series[:split_time]
 time_valid = time[split_time:]
 x_valid = series[split_time:]
 
+# naive forcasting
+naive_forecast = series[split_time - 1:-1]
+plt.figure(figsize=(10, 6))
+plot_series(time_valid, x_valid, start=0, end=150, label="Series")
+plot_series(time_valid, naive_forecast, start=1, end=151, label="Forecast")
+plt.show()
+
+errors = naive_forecast - x_valid
+abs_errors = np.abs(errors)
+mae_naive1 = abs_errors.mean()
+print('mae_naive_forcasting1:', mae_naive1)
+mae_naive2 = tf.keras.metrics.mean_absolute_error(x_valid, naive_forecast).numpy()
+print('mae_naive_forcasting2:', mae_naive2)
+
 
 def moving_average_forecast1(series, window_size):
     """Forecasts the mean of the last few values.
@@ -70,22 +84,21 @@ def moving_average_forecast2(series, window_size):
 
 
 moving_avg = moving_average_forecast2(series, 30)[split_time - 30:]
-
-plt.figure(figsize=(10, 6))
-plot_series(time_valid, x_valid, label="Series")
-plot_series(time_valid, moving_avg, label="Moving average (30 days)")
-plt.show()
-mae1 = tf.keras.metrics.mean_absolute_error(x_valid, moving_avg).numpy()
-print(mae1)
+mae_moving1 = tf.keras.metrics.mean_absolute_error(x_valid, moving_avg).numpy()
+print('mae_moving_average:', mae_moving1)
 
 # Using Differencing
 diff_series = (series[365:] - series[:-365])
 diff_time = time[365:]
 diff_moving_avg = moving_average_forecast2(diff_series, 50)[split_time - 365 - 50:]
 diff_moving_avg_plus_past = series[split_time - 365:-365] + diff_moving_avg
-mae2 = tf.keras.metrics.mean_absolute_error(x_valid, diff_moving_avg_plus_past).numpy()
-print(mae2)
+mae_moving2 = tf.keras.metrics.mean_absolute_error(x_valid, diff_moving_avg_plus_past).numpy()
+print('mae_diff_moving_avg_plus_past:', mae_moving2)
 
 diff_moving_avg_plus_smooth_past = moving_average_forecast2(series[split_time - 370:-359], 11) + diff_moving_avg
-mae3 = tf.keras.metrics.mean_absolute_error(x_valid, diff_moving_avg_plus_smooth_past).numpy()
-print(mae3)
+plt.figure(figsize=(10, 6))
+plot_series(time_valid, x_valid, label="Series")
+plot_series(time_valid, diff_moving_avg_plus_smooth_past, label="Moving average using differencing plus smooth past")
+plt.show()
+mae_moving3 = tf.keras.metrics.mean_absolute_error(x_valid, diff_moving_avg_plus_smooth_past).numpy()
+print('mae_diff_moving_avg_plus_smooth_past:', mae_moving3)

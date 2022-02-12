@@ -28,10 +28,11 @@ def generate(sample_size, classNum, diff, regression=False):
     return X, Y
 
 
+np.random.seed(10)
 input_dim = 2
 num_classes = 3
 lab_dim = num_classes
-X, Y = generate(1000, num_classes, [[3.0], [3.0, 0]], False)
+X, Y = generate(2000, num_classes, [[3.0, 3.0], [3.0, 0]], False)
 
 inputs = tf.placeholder(tf.float32, [None, input_dim])
 labels = tf.placeholder(tf.float32, [None, lab_dim])
@@ -68,7 +69,7 @@ with tf.Session() as sess:
 
     print(sess.run(W), sess.run(b))
 
-    train_X, train_Y = generate(200, num_classes, [[3.0], [3.0, 0]], False)
+    train_X, train_Y = generate(200, num_classes, [[3.0, 3.0], [3.0, 0]], False)
     aa = [np.argmax(l) for l in train_Y]
     colors = ['r' if l == 0 else 'b' if l == 1 else 'y' for l in aa[:]]
     plt.scatter(train_X[:, 0], train_X[:, 1], c=colors)

@@ -52,6 +52,7 @@ loss = tf.reduce_mean((y_pred - y) ** 2) + tf.nn.l2_loss(weights['h1']) * reg + 
 global_step = tf.Variable(0, trainable=False)
 decaylearning_rate = tf.train.exponential_decay(learning_rate, global_step, 1000, 0.9)
 train = tf.train.AdamOptimizer(learning_rate).minimize(loss, global_step=global_step)
+add_global = global_step.assign_add(1)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
